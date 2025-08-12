@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Overwatch 2 Rank Display</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
+
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #333;
+            font-family: 'Montserrat', sans-serif;
+            color: white;
+        }
+
+        .rank-shelf {
+            display: flex;
+            flex-direction: row;
+            gap: 10px;
+            position: relative;
+        }
+
+        .category-icon {
+            position: flex;
+            width: 1100px;
+            height: 400px;
+            transform: translate(-7%, -60%);
+            opacity: 0.4;
+            object-fit: contain;
+            filter: drop-shadow(5px 5px 10px #000000);
+            z-index: 0;
+            margin-right: -1200px;
+        }
+
+        .rank-box {
+            position: relative;
+            background-image: url('https://i.imgur.com/VW2vLbY.png');
+            background-size: cover;
+            background-position: center;
+            border-radius: 25px;
+            width: 1100px;
+            height: 400px;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            z-index: 1;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+        }
+
+        .rank-box.show {
+            opacity: 1;
+        }
+
+        .rank-image-wrapper {
+            position: relative;
+            height: 250px;
+            width: 250px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding-right: 20px;
+        }
+
+        .rank-image-wrapper img.rank-icon {
+            height: 250px;
+            width: 250px;
+            object-fit: contain;
+            filter: drop-shadow(5px 5px 10px #000000);
+        }
+
+        .rank-image-wrapper img.division-icon {
+            position: absolute;
+            bottom: -80px;
+            left: 4px;
+            height: 250px;
+            width: 250px;
+            object-fit: contain;
+            filter: drop-shadow(5px 5px 10px #000000);
+        }
+
+        .rank-details {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            filter: drop-shadow(5px 5px 10px #000000);
+        }
+
+        .rank-tier {
+            font-size: 150px;
+            font-weight: 700;
+            color: white;
+        }
+
+        .no-rank-text {
+            font-size: 150px;
+            font-weight: 700;
+            text-align: center;
+            line-height: 0.8;
+            margin-left: -280px;
+        }
+
+        /* Rank change animations */
+        .rank-increase {
+            animation: rankIncreaseAnimation 1s forwards;
+        }
+
+        .rank-decrease {
+            animation: rankDecreaseAnimation 1s forwards;
+        }
+
+        @keyframes rankIncreaseAnimation {
+            from { color: white; }
+            to { color: #00FF00; }
+        }
+
+        @keyframes rankDecreaseAnimation {
+            from { color: white; }
+            to { color: #FF0000; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="rank-shelf" id="rank-shelf"></div>
+
+<script>
+
+	// Put your information here
+	const USERNAME  = "YOUR_USERNAME";	// Please put your username here
+	const TAG		    = "YOUR_TAG";		    // Please put your tag here
+
+    let previousRanks = {};
+
+    async function fetchRankData() {
+        try {
+            const response = await fetch(`https://overfast-api.tekrop.fr/players/${USERNAME}-${TAG}/summary`);
+            if (!response.ok) {
+                throw new Error(`API request failed with status ${response.status}`);
+            }
+            const data = await response.json();
+            updateRankDisplay(data);
+        } catch (error) {
+            console.error('Error fetching rank data:', error);
+        }
+    }
+
+    function updateRankDisplay(data) {
+        const categories = [
+            { key: 'damage', icon: 'https://i.imgur.com/d4P0vD4.png' },
+            { key: 'tank', icon: 'https://i.imgur.com/gVsjK6F.png' },
+            { key: 'support', icon: 'https://i.imgur.com/TyN5BQc.png' },
+            { key: 'open', icon: 'https://i.imgur.com/npadKvo.png' }
+        ];
+
+        const rankShelf = document.getElementById('rank-shelf');
+        rankShelf.innerHTML = '';
+
+        categories.forEach(({ key, icon }) => {
+            const categoryData = data.competitive.pc[key];
+
+            const categoryIcon = document.createElement('img');
+            categoryIcon.classList.add('category-icon');
+            categoryIcon.src = icon;
+            rankShelf.appendChild(categoryIcon);
+
+            const rankBox = document.createElement('div');
+            rankBox.classList.add('rank-box', 'show');
+
+            const rankImageWrapper = document.createElement('div');
+            rankImageWrapper.classList.add('rank-image-wrapper');
+
+            const rankImage = document.createElement('img');
+            rankImage.classList.add('rank-icon');
+
+            const divisionImage = document.createElement('img');
+            divisionImage.classList.add('division-icon');
+
+            const rankDetails = document.createElement('div');
+            rankDetails.classList.add('rank-details');
+
+            if (categoryData && categoryData.rank_icon && categoryData.tier_icon) {
+                rankImage.src = categoryData.rank_icon;
+                divisionImage.src = categoryData.tier_icon;
+
+                const tierText = document.createElement('div');
+                tierText.classList.add('rank-tier');
+                tierText.textContent = `DIV ${categoryData.tier}`;
+
+                if (previousRanks[key] && previousRanks[key] !== categoryData.tier) {
+                    rankBox.classList.add(previousRanks[key] < categoryData.tier ? 'rank-increase' : 'rank-decrease');
+                }
+
+                previousRanks[key] = categoryData.tier;
+
+                rankImageWrapper.appendChild(rankImage);
+                rankImageWrapper.appendChild(divisionImage);
+                rankDetails.appendChild(tierText);
+            } else {
+                const noRankText = document.createElement('div');
+                noRankText.classList.add('no-rank-text');
+                noRankText.innerHTML = 'NO<br>RANK';
+                rankDetails.appendChild(noRankText);
+            }
+
+            rankBox.appendChild(rankImageWrapper);
+            rankBox.appendChild(rankDetails);
+            rankShelf.appendChild(rankBox);
+        });
+    }
+
+    fetchRankData();
+    setInterval(fetchRankData, 120000); 
+</script>
+
+</body>
+</html>
