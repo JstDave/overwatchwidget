@@ -73,10 +73,10 @@ The widget is customizable and designed for use in streaming software like OBS.
 ## Role Categories
 
 The widget displays ranks for all four competitive categories:
-- **Damage** (DPS) - Orange icon
-- **Tank** - Blue icon  
-- **Support** - Yellow icon
-- **Open Queue** - Purple icon
+- **Damage** (DPS)
+- **Tank** 
+- **Support** 
+- **Open Queue** 
 
 Each category shows the rank icon, division icon, and tier number (DIV 1-5) when ranked, or "NO RANK" when unranked.
 
