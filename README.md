@@ -1,3 +1,9 @@
+# ℹ️ Important Information
+
+This widget was solely made by me (JstDave). It would be nice if you could give me a follow or subscription on my Twitch channel at [https://twitch.tv/jstdave](https://twitch.tv/jstdave) if you like the widget! 
+
+If you need help or want to ask me something about the widget, please join the [Discord](https://dc.jstdave.com) or contact me on one of my [socials](https://jstdave.com/socials)! 
+
 # Overwatch 2 Rank Widget  
 
 This project is an **Overwatch 2 Rank Widget** that dynamically displays your current competitive ranks and divisions for all role categories (Damage, Tank, Support, and Open Queue). It includes smooth animations for rank changes and displays appropriate icons for each role.
